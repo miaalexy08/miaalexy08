@@ -24,6 +24,7 @@ font = pygame.font.Font(None, 36)  # Default font with size 36
 current_level = 1
 score = 0
 lives = 3
+level1_completed = False  # New variable to track Level 1 completion
 
 # Helper Function to Display Text
 def display_text(text, x, y, color=WHITE, font_size=36):
@@ -36,17 +37,22 @@ def display_screen():
     screen.fill(BLACK)  # Fill the background with black
 
     if current_level == 1:
-        display_text("Welcome to Cyber Sleuth!", WIDTH//2 - 150, HEIGHT//2 - 50)
-        display_text("Press SPACE to Start Level 1", WIDTH//2 - 150, HEIGHT//2 + 10)
+        if not level1_completed:
+            # Display instructions for Level 1
+            display_text("Level 1: Phishing Detection", WIDTH // 2 - 150, HEIGHT // 2 - 100)
+            display_text("Press 'P' for Phishing or 'S' for Safe", WIDTH // 2 - 200, HEIGHT // 2)
+            display_text("Email: 'Your account is compromised, click here!'", WIDTH // 2 - 250, HEIGHT // 2 + 50)
+        else:
+            # Display level complete message if Level 1 is done
+            display_text("Level 1 Complete! Press SPACE to continue.", WIDTH // 2 - 200, HEIGHT // 2)
     elif current_level == 2:
-        display_text("Level 2: Malware Maze", WIDTH//2 - 150, HEIGHT//2 - 50)
-    # You can add more elif statements for each level's screen
-
+        display_text("Level 2: Malware Maze", WIDTH // 2 - 150, HEIGHT // 2 - 50)
+    
     # Display score and lives
     display_text(f"Score: {score}", 10, 10, GREEN)
     display_text(f"Lives: {lives}", WIDTH - 100, 10, RED)
 
-# Main Game Loop
+# Main game loop
 clock = pygame.time.Clock()
 running = True
 while running:
@@ -55,10 +61,20 @@ while running:
             pygame.quit()
             sys.exit()
 
-        # Check for keypress to move to next level or start game
+        # Check for keypress events
         elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                current_level += 1  # Move to the next level when SPACE is pressed
+            # Check for level-specific interactions
+            if current_level == 1 and not level1_completed:
+                if event.key == pygame.K_p:  # P for "Phishing"
+                    score += 10  # Award points for correct identification
+                    level1_completed = True  # Mark level as completed
+                elif event.key == pygame.K_s:  # S for "Safe"
+                    lives -= 1  # Deduct a life for incorrect answer
+
+            # Move to the next level when SPACE is pressed if level is completed
+            elif event.key == pygame.K_SPACE and level1_completed:
+                current_level += 1
+                level1_completed = False  # Reset for next level if needed
 
     # Display the current screen based on the level
     display_screen()
@@ -68,4 +84,5 @@ while running:
 
     # Control the frame rate
     clock.tick(30)  # 30 frames per second
+
 
